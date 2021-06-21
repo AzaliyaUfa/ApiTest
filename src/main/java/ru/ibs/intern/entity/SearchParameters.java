@@ -15,10 +15,9 @@ import javax.persistence.Table;
 public class SearchParameters {
 
     private String name;
-    private Integer areaId; //// проработать с бд!
-    private String areaName; //// проработать с бд!
-    private String onlyWithSalary = "false";
-    private Long salaryFrom;
-    private Long salaryTo;
+    private String areaName;
+    private boolean onlyWithSalary = true;
+    private Long salaryFrom; //// проработать
+    private Long salaryTo; //// проработать
 
 }

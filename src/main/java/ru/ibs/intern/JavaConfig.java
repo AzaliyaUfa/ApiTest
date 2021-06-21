@@ -1,5 +1,7 @@
 package ru.ibs.intern;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -16,13 +18,22 @@ import javax.sql.DataSource;
 @EnableJpaRepositories(basePackages = "ru.ibs.intern.repositories")
 public class JavaConfig {
 
+    @Value("${spring.datasource.username}")
+    private String bdUserName;
+
+    @Value("${spring.datasource.password}")
+    private String bdUserPass;
+
+    @Value("${spring.datasource.url}")
+    private String bdUserUrl;
+
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setUsername("nancy");
-        dataSource.setPassword("supra");
-        dataSource.setUrl("jdbc:postgresql://localhost:8081/hhBD");
+        dataSource.setUsername(bdUserName);
+        dataSource.setPassword(bdUserPass);
+        dataSource.setUrl(bdUserUrl);
         return dataSource;
     }
 
@@ -48,4 +59,11 @@ public class JavaConfig {
     public RestTemplate getRestTemplate() {
         return new RestTemplate();
     }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
+
+
 }

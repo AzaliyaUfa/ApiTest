@@ -1,6 +1,7 @@
 package ru.ibs.intern.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -15,12 +16,34 @@ public class VacanciesServiceImpl {
     @Autowired
     private VacanciesRepo vacanciesRepo;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     private final static RestTemplate restTemplate = new RestTemplate();
 
-    public void getVacancies(int requiredVacanciesNumber, String url) {
+    /*public void getVacancies1(int requiredVacanciesNumber, String url) {
         int count = 0;
 
         for (int i = 0; i < 100; i++) {
+            for (int j = 0; j < 20; j++) {
+                JsonNode currentVacanciesList = restTemplate.exchange(url + "&page=" + i, HttpMethod.GET
+                        , null, JsonNode.class).getBody();
+                objectMapper.convertValue(currentVacanciesList.get("items").get(j), Vacancy.class);
+                //vacanciesRepo.save(vacancy);
+                count++;
+            }
+            if(count == requiredVacanciesNumber) break;
+
+        }
+    }*/
+
+    public void getVacancies(int requiredVacanciesNumber, String url) {
+        int count = 0;
+        int pages = restTemplate.exchange(url, HttpMethod.GET
+                , null, JsonNode.class).getBody().get("pages").asInt();
+        int found = restTemplate.exchange(url, HttpMethod.GET
+                , null, JsonNode.class).getBody().get("found").asInt();
+        for (int i = 0; i < pages; i++) {
             JsonNode currentVacanciesList = restTemplate.exchange(url + "&page=" + i, HttpMethod.GET
                                             , null, JsonNode.class).getBody();
             for (int j = 0; j < 20; j++) {
@@ -28,9 +51,9 @@ public class VacanciesServiceImpl {
                 writeData(currentVacanciesList.get("items").get(j), vacancy);
                 vacanciesRepo.save(vacancy);
                 count++;
+                if(count == requiredVacanciesNumber || count == found) break;
             }
-            if(count == requiredVacanciesNumber) break;
-
+            if(count == requiredVacanciesNumber || count == found) break;
         }
     }
 
@@ -67,6 +90,10 @@ public class VacanciesServiceImpl {
                 vacancy.setCompanyName(currentHHVacancy.get("employer").get("name").asText());
             }
         }
+    }
+
+    public void truncateTable() {
+        vacanciesRepo.deleteAll();
     }
 
 }
